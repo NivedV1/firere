@@ -283,6 +283,14 @@
 
     <!-- jsboy emulator library -->
     <!-- Load jsboy from CDN for GBA emulation -->
-    <script src="https://cdn.jsdelivr.net/gh/NivedV1/firere@main/web_emulator/jsboy.min.js"></script>
+    <!-- jsboy emulator library -->
+    <script>
+        // Minimal jsboy stub for now - replace with real library
+        window.jsboy = {
+            loadRom: function(rom) { console.log('ROM loaded:', rom.length, 'bytes'); },
+            runFrame: function() { /* Placeholder */ },
+            getFrameBuffer: function() { return new Uint8Array(256*192*4); }
+        };
+    </script>
 </body>
 </html>
