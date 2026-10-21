@@ -324,10 +324,11 @@
     <!-- jsboy emulator library -->
     <script>
         // Minimal jsboy stub for now - replace with real library
-        window.jsboy = {
-            loadRom: function(rom) { console.log('ROM loaded:', rom.length, 'bytes'); },
-            runFrame: function() { /* Placeholder */ },
-            getFrameBuffer: function() { return new Uint8Array(256*192*4); }
+        // jsboy should be a constructor, not an object
+        window.jsboy = function() {
+            this.loadRom = function(rom) { console.log('ROM loaded:', rom.length, 'bytes'); };
+            this.runFrame = function() { /* Placeholder */ };
+            this.getFrameBuffer = function() { return new Uint8Array(256*192*4); };
         };
     </script>
 </body>
