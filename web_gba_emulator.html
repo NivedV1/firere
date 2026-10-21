@@ -290,16 +290,31 @@
             if (emulator) {
                 console.log('[GAMELOOP] Running emulator frame');
                 // Update input
-                // emulator.setKey('A', keys.a);
-                // emulator.setKey('B', keys.b);
-                // ... etc
+                // Map keys to emulator
+                // Update input state
 
                 // Run frame
-                // emulator.runFrame();
+                try {
+                    emulator.runFrame();
+                    console.log('[GAMELOOP] Frame executed');
+                } catch (err) {
+                    console.error('[GAMELOOP] Error running frame:', err);
+                }
 
-                // Get framebuffer
-                // const fb = emulator.getFrameBuffer();
-                // renderFramebuffer(fb);
+                // Get framebuffer and render
+                try {
+                    const fb = emulator.getFrameBuffer();
+                    if (fb && fb.length >= 256*192*4) {
+                        renderFramebuffer(fb);
+                        console.log('[GAMELOOP] Framebuffer rendered');
+                    } else {
+                        console.log('[GAMELOOP] Invalid framebuffer:', fb?.length);
+                        drawTestPattern();
+                    }
+                } catch (err) {
+                    console.error('[GAMELOOP] Error rendering:', err);
+                    drawTestPattern();
+                }
             } else {
                 // Draw test pattern
                 drawTestPattern();
@@ -326,9 +341,30 @@
         // Minimal jsboy stub for now - replace with real library
         // jsboy should be a constructor, not an object
         window.jsboy = function() {
-            this.loadRom = function(rom) { console.log('ROM loaded:', rom.length, 'bytes'); };
-            this.runFrame = function() { /* Placeholder */ };
-            this.getFrameBuffer = function() { return new Uint8Array(256*192*4); };
+            this.rom = null;
+            this.loadRom = function(rom) {
+                console.log('ROM loaded:', rom.length, 'bytes');
+                this.rom = rom;
+            };
+            this.runFrame = function() {
+                // Simulate frame execution
+                console.log('Frame executed');
+            };
+            this.getFrameBuffer = function() {
+                // Create a test pattern framebuffer with colored gradient
+                const buf = new Uint8Array(256*192*4);
+                for (let y = 0; y < 192; y++) {
+                    for (let x = 0; x < 256; x++) {
+                        const idx = (y * 256 + x) * 4;
+                        // Create a moving color pattern
+                        buf[idx] = (x + y) % 256;         // R
+                        buf[idx + 1] = (x * 2) % 256;      // G
+                        buf[idx + 2] = (y * 2) % 256;      // B
+                        buf[idx + 3] = 255;                // A
+                    }
+                }
+                return buf;
+            };
         };
     </script>
 </body>
