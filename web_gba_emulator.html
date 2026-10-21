@@ -195,45 +195,74 @@
             const file = e.target.files[0];
             if (!file) return;
 
+            console.log('[EMULATOR] Loading file:', file.name, file.size);
             setProgress(1, `Loading ${file.name}...`);
 
-            const arrayBuffer = await file.arrayBuffer();
-            const romData = new Uint8Array(arrayBuffer);
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                console.log('[EMULATOR] ArrayBuffer loaded:', arrayBuffer.byteLength);
+                const romData = new Uint8Array(arrayBuffer);
 
-            // Verify ROM size (GBA ROMs are 16KB to 32MB)
-            if (romData.length < 16384 || romData.length > 33554432) {
-                setStatus('Invalid ROM size!');
-                return;
-            }
+                console.log('[EMULATOR] ROM data created:', romData.length, 'bytes');
 
-            setProgress(2, 'Verifying SHA1...');
+                // Verify ROM size (GBA ROMs are 16KB to 32MB)
+                if (romData.length < 16384 || romData.length > 33554432) {
+                    console.error('[EMULATOR] Invalid ROM size:', romData.length);
+                    setStatus('Invalid ROM size!');
+                    return;
+                }
 
-            // Basic SHA1 would go here - placeholder for now
-            // In production, compute actual SHA1 and compare to 41cb23d8...
+                console.log('[EMULATOR] ROM size valid');
+                setProgress(2, 'Verifying SHA1...');
 
-            setProgress(3, 'Initializing GBA emulator...');
+                // Basic SHA1 would go here - placeholder for now
+                // In production, compute actual SHA1 and compare to 41cb23d8...
+                console.log('[EMULATOR] SHA1 verification placeholder');
 
-            // Check if jsboy is loaded
-            if (typeof window.jsboy === 'undefined') {
-                // Fallback to minimal emulator
-                setStatus('jsboy not loaded. Using minimal emulator...');
-                emulateWithMinimal(romData);
-                return;
-            }
+                setProgress(3, 'Initializing GBA emulator...');
+                console.log('[EMULATOR] Initializing GBA emulator');
 
-            setProgress(4, 'Creating emulator instance...');
+                // Check if jsboy is loaded
+                if (typeof window.jsboy === 'undefined') {
+                    console.warn('[EMULATOR] jsboy not loaded - using minimal emulator');
+                    // Fallback to minimal emulator
+                    setStatus('jsboy not loaded. Using minimal emulator...');
+                    emulateWithMinimal(romData);
+                    return;
+                }
 
+                console.log('[EMULATOR] jsboy found, creating instance');
+                setProgress(4, 'Creating emulator instance...');
+
+                console.log('[EMULATOR] Creating emulator instance');
             // Initialize jsboy emulator
-            emulator = new jsboy();
+            try {
+                emulator = new jsboy();
+                console.log('[EMULATOR] Emulator created successfully');
+            } catch (err) {
+                console.error('[EMULATOR] Failed to create emulator:', err);
+                setStatus('Failed to create emulator: ' + err.message);
+                return;
+            }
 
             setProgress(5, 'Loading ROM into emulator...');
+            console.log('[EMULATOR] Loading ROM into emulator');
 
-            emulator.loadRom(romData);
+            try {
+                emulator.loadRom(romData);
+                console.log('[EMULATOR] ROM loaded successfully');
+            } catch (err) {
+                console.error('[EMULATOR] Failed to load ROM:', err);
+                setStatus('Failed to load ROM: ' + err.message);
+                return;
+            }
 
             setProgress(6, 'Starting emulation...');
+            console.log('[EMULATOR] Starting emulation');
 
             // Start game loop
             emulatorRunning = true;
+            console.log('[EMULATOR] Game loop started');
             gameLoop();
 
             setStatus('Running! Controls: Arrows=D-Pad, Z=A, X=B, Enter=Start, Shift=Select, C=L, V=R');
@@ -241,6 +270,7 @@
 
         // Minimal emulator fallback
         function emulateWithMinimal(romData) {
+            console.log('[EMULATOR] Using minimal emulator fallback');
             // Minimal emulation - just show pattern
             emulatorRunning = true;
             gameLoop();
@@ -250,8 +280,11 @@
         function gameLoop() {
             if (!emulatorRunning) return;
 
+            console.log('[GAMELOOP] Frame', frameCount);
+
             // Run emulator frame
             if (emulator) {
+                console.log('[GAMELOOP] Running emulator frame');
                 // Update input
                 // emulator.setKey('A', keys.a);
                 // emulator.setKey('B', keys.b);
@@ -271,6 +304,7 @@
             // Update bank counter
             currentBank = (currentBank + 1) & 0x00F;
             drawBankCounter(currentBank);
+            frameCount++;
 
             requestAnimationFrame(gameLoop);
         }
